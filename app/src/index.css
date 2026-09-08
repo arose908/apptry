@@ -1,0 +1,130 @@
+:root {
+  --ink: #1c1a17;
+  --ink-soft: #24211d;
+  --surface-dark-1: #2a2622;
+  --surface-dark-2: #262320;
+  --surface-dark-3: #34302a;
+  --surface-dark-4: #46413a;
+
+  --paper: #f4f1ea;
+  --canvas: #eae6dc;
+  --card: #fbf9f4;
+  --border: #e2dcd0;
+  --border-dashed: #c9bfae;
+
+  --text-muted: #6c6558;
+  --text-muted-2: #5c574e;
+  --text-dark-muted: #a79e8e;
+  --text-dark-muted-2: #c9bfae;
+
+  --accent: #d94f2b;
+  --accent-btn: #c4441f;
+  --accent-link: #b03d1d;
+  --accent-light-text: #ee7a54;
+  --chip-border: #e8c4b7;
+  --chip-bg: #fbede8;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--canvas);
+  font-family: 'Archivo', system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+/* ---- shared building blocks (mirrors the mockup's repeated patterns) ---- */
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.chip {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent-link);
+  border: 1px solid var(--chip-border);
+  background: var(--chip-bg);
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.btn-primary {
+  background: var(--accent-btn);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  padding: 14px;
+  border-radius: 11px;
+  display: block;
+  width: 100%;
+}
+
+.btn-primary:active {
+  opacity: 0.85;
+}
+
+.btn-dark {
+  background: var(--surface-dark-3);
+  color: var(--text-dark-muted-2);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 13px 16px;
+  border-radius: 9px;
+  text-align: center;
+}
+
+.btn-ghost {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-muted-2);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  padding: 14px;
+  border-radius: 12px;
+}
+
+.link-cta {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-link);
+}
