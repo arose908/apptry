@@ -40,9 +40,9 @@ export default function TodayScreen({ settings, onStartFocus, onOpenSettings }) 
       style={{
         minHeight: '100%',
         boxSizing: 'border-box',
-        background: 'var(--paper)',
+        background: 'var(--page-bg)',
         padding: '60px 22px 22px',
-        color: 'var(--ink)',
+        color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',
         gap: 12,
@@ -90,7 +90,7 @@ export default function TodayScreen({ settings, onStartFocus, onOpenSettings }) 
             borderRadius: 11,
             padding: '13px 16px',
             fontSize: 15,
-            color: 'var(--ink)',
+            color: 'var(--text-primary)',
             resize: 'none',
             fontFamily: 'inherit',
           }}

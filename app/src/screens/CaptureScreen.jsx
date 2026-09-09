@@ -52,9 +52,9 @@ export default function CaptureScreen({ onBack, onSort }) {
         position: 'absolute',
         inset: 0,
         boxSizing: 'border-box',
-        background: 'var(--paper)',
+        background: 'var(--page-bg)',
         padding: '60px 22px 30px',
-        color: 'var(--ink)',
+        color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',
         gap: 18,
@@ -79,7 +79,7 @@ export default function CaptureScreen({ onBack, onSort }) {
             background: 'transparent',
             fontSize: 17,
             lineHeight: 1.4,
-            color: 'var(--ink)',
+            color: 'var(--text-primary)',
             resize: 'none',
             fontFamily: 'inherit',
             width: '100%',
@@ -160,7 +160,7 @@ export default function CaptureScreen({ onBack, onSort }) {
             gap: 12,
           }}
         >
-          <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)', lineHeight: 1.35 }}>
+          <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.35 }}>
             {state.captureInbox.length} thing{state.captureInbox.length === 1 ? '' : 's'} in here. Sorting takes 2 minutes.
           </span>
           <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent-link)', whiteSpace: 'nowrap' }}>

@@ -28,9 +28,9 @@ export default function SortScreen({ onBack, onFinish }) {
           position: 'absolute',
           inset: 0,
           boxSizing: 'border-box',
-          background: 'var(--paper)',
+          background: 'var(--page-bg)',
           padding: '60px 22px 30px',
-          color: 'var(--ink)',
+          color: 'var(--text-primary)',
           display: 'flex',
           flexDirection: 'column',
           gap: 18,
@@ -71,9 +71,9 @@ export default function SortScreen({ onBack, onFinish }) {
         position: 'absolute',
         inset: 0,
         boxSizing: 'border-box',
-        background: 'var(--paper)',
+        background: 'var(--page-bg)',
         padding: '60px 22px 30px',
-        color: 'var(--ink)',
+        color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',
         gap: 18,
@@ -156,7 +156,7 @@ export default function SortScreen({ onBack, onFinish }) {
                 style={{
                   fontSize: 16,
                   fontWeight: dest.dark ? 600 : 500,
-                  color: dest.dark ? 'var(--paper)' : dest.dashed ? 'var(--text-muted)' : 'var(--ink)',
+                  color: dest.dark ? 'var(--paper)' : dest.dashed ? 'var(--text-muted)' : 'var(--text-primary)',
                 }}
               >
                 {dest.label}

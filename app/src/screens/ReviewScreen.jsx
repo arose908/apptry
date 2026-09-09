@@ -12,9 +12,9 @@ export default function ReviewScreen({ settings }) {
       style={{
         minHeight: '100%',
         boxSizing: 'border-box',
-        background: 'var(--paper)',
+        background: 'var(--page-bg)',
         padding: '60px 22px 22px',
-        color: 'var(--ink)',
+        color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',
         gap: 18,
@@ -42,7 +42,7 @@ export default function ReviewScreen({ settings }) {
                     width: `${item.actualPct}%`,
                     height: 9,
                     borderRadius: 5,
-                    background: item.actual > item.guessed ? 'var(--accent)' : 'var(--ink)',
+                    background: item.actual > item.guessed ? 'var(--accent)' : 'var(--text-primary)',
                     display: 'block',
                   }}
                 />
@@ -75,7 +75,7 @@ export default function ReviewScreen({ settings }) {
 
       <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16, borderTop: '1px solid var(--border)' }}>
         {settings.showDropCounts && (
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
             {review.droppedCount} thing{review.droppedCount === 1 ? '' : 's'} dropped this week
           </span>
         )}

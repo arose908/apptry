@@ -10,6 +10,10 @@ export default function WeddingScreen() {
   const [addingBudget, setAddingBudget] = useState(false)
   const [budgetLabel, setBudgetLabel] = useState('')
   const [budgetAmount, setBudgetAmount] = useState('')
+  const [addingVendor, setAddingVendor] = useState(false)
+  const [vendorCategory, setVendorCategory] = useState('')
+  const [vendorName, setVendorName] = useState('')
+  const [vendorPhone, setVendorPhone] = useState('')
 
   const addChecklistItem = () => {
     if (!newItem.trim()) return
@@ -26,14 +30,28 @@ export default function WeddingScreen() {
     setAddingBudget(false)
   }
 
+  const addVendor = () => {
+    if (!vendorName.trim()) return
+    dispatch({
+      type: 'WEDDING_ADD_VENDOR',
+      category: vendorCategory.trim() || 'Vendor',
+      name: vendorName.trim(),
+      phone: vendorPhone.trim(),
+    })
+    setVendorCategory('')
+    setVendorName('')
+    setVendorPhone('')
+    setAddingVendor(false)
+  }
+
   return (
     <div
       style={{
         minHeight: '100%',
         boxSizing: 'border-box',
-        background: 'var(--paper)',
+        background: 'var(--page-bg)',
         padding: '60px 22px 22px',
-        color: 'var(--ink)',
+        color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',
         gap: 18,
@@ -103,12 +121,76 @@ export default function WeddingScreen() {
             onChange={(e) => setNewItem(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addChecklistItem()}
             placeholder="Add to the wedding list"
-            style={{ flex: 1, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', fontSize: 14, color: 'var(--ink)' }}
+            style={{ flex: 1, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', fontSize: 14, color: 'var(--text-primary)' }}
           />
           <button onClick={addChecklistItem} className="link-cta">
             Add
           </button>
         </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <span className="eyebrow">VENDORS</span>
+        {state.wedding.vendors.map((v) => (
+          <div key={v.id} className="card" style={{ padding: '11px 14px', borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: 'var(--text-muted)' }}>
+                {v.category.toUpperCase()}
+              </span>
+              <span style={{ fontSize: 15, fontWeight: 500 }}>{v.name}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 'none' }}>
+              {v.phone && (
+                <a href={`tel:${v.phone}`} className="link-cta" style={{ fontSize: 13 }}>
+                  Call
+                </a>
+              )}
+              <button
+                onClick={() => dispatch({ type: 'WEDDING_DELETE_VENDOR', id: v.id })}
+                aria-label={`Remove ${v.name}`}
+                style={{ fontSize: 13, color: 'var(--text-muted)' }}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {addingVendor ? (
+          <div className="card" style={{ borderRadius: 10, padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <input
+              value={vendorCategory}
+              onChange={(e) => setVendorCategory(e.target.value)}
+              placeholder="Category (Florist, DJ, Caterer…)"
+              style={{ background: 'var(--page-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text-primary)' }}
+            />
+            <input
+              value={vendorName}
+              onChange={(e) => setVendorName(e.target.value)}
+              placeholder="Name"
+              style={{ background: 'var(--page-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text-primary)' }}
+            />
+            <input
+              value={vendorPhone}
+              onChange={(e) => setVendorPhone(e.target.value)}
+              placeholder="Phone (optional)"
+              type="tel"
+              style={{ background: 'var(--page-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13, color: 'var(--text-primary)' }}
+            />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={addVendor} className="btn-primary" style={{ flex: 1, fontSize: 14, padding: 10 }}>
+                Add
+              </button>
+              <button onClick={() => setAddingVendor(false)} style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button onClick={() => setAddingVendor(true)} style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-link)', textAlign: 'left' }}>
+            + add a vendor
+          </button>
+        )}
       </div>
 
       <div style={{ marginTop: 'auto' }} className="card">
@@ -121,7 +203,7 @@ export default function WeddingScreen() {
             </span>
           </div>
           <div style={{ height: 12, borderRadius: 7, background: 'var(--border)', overflow: 'hidden', display: 'flex' }}>
-            <span style={{ width: `${wedding.budget.spentPct}%`, background: 'var(--ink)', display: 'block' }} />
+            <span style={{ width: `${wedding.budget.spentPct}%`, background: 'var(--text-primary)', display: 'block' }} />
             <span style={{ width: `${wedding.budget.committedPct}%`, background: 'var(--accent)', display: 'block' }} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)' }}>
@@ -135,14 +217,14 @@ export default function WeddingScreen() {
                 value={budgetLabel}
                 onChange={(e) => setBudgetLabel(e.target.value)}
                 placeholder="Item"
-                style={{ flex: 1, background: 'var(--paper)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13 }}
+                style={{ flex: 1, background: 'var(--page-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13 }}
               />
               <input
                 value={budgetAmount}
                 onChange={(e) => setBudgetAmount(e.target.value)}
                 placeholder="$"
                 inputMode="numeric"
-                style={{ width: 70, background: 'var(--paper)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13 }}
+                style={{ width: 70, background: 'var(--page-bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', fontSize: 13 }}
               />
               <button onClick={addBudgetItem} className="link-cta">
                 Add
