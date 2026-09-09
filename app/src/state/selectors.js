@@ -121,6 +121,33 @@ export function habitWeekCount(habit, now = new Date()) {
   return habitWeekGrid(habit, now).filter((v) => v === 1).length
 }
 
+const STREAK_UNLOCK_DAYS = 21
+export const HABIT_BASE_CAP = 4
+
+export function habitDailyStreak(habit, now = new Date()) {
+  if (habit.type !== 'check') return 0
+  let streak = 0
+  let cursor = new Date(now)
+  if (!habit.history[dateKey(cursor)]) cursor = addDays(cursor, -1)
+  while (habit.history[dateKey(cursor)]) {
+    streak++
+    cursor = addDays(cursor, -1)
+  }
+  return streak
+}
+
+export function bestHabitStreak(habits, now = new Date()) {
+  return Math.max(0, ...habits.map((h) => habitDailyStreak(h, now)))
+}
+
+export function habitCap(habits, now = new Date()) {
+  return bestHabitStreak(habits, now) >= STREAK_UNLOCK_DAYS ? HABIT_BASE_CAP + 1 : HABIT_BASE_CAP
+}
+
+export function streakUnlockProgress(habits, now = new Date()) {
+  return { current: bestHabitStreak(habits, now), target: STREAK_UNLOCK_DAYS }
+}
+
 export function weddingView(state, now = new Date()) {
   const weddingDate = new Date(`${state.wedding.date}T00:00:00`)
   const daysOut = Math.max(0, daysBetween(now, weddingDate))

@@ -1,5 +1,5 @@
 export default function BackHeader({ label, onBack, dark = false }) {
-  const c = dark ? '#F4F1EA' : '#1C1A17'
+  const c = dark ? '#F4F1EA' : 'var(--text-primary)'
   return (
     <button
       onClick={onBack}
@@ -13,7 +13,7 @@ export default function BackHeader({ label, onBack, dark = false }) {
         gap: 6,
         padding: '6px 10px 6px 6px',
         borderRadius: 20,
-        background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(28,26,23,0.06)',
+        background: dark ? 'var(--back-pill-bg-dark-screen)' : 'var(--back-pill-bg)',
       }}
       aria-label={label || 'Back'}
     >

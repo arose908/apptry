@@ -1,30 +1,71 @@
 :root {
+  /* fixed "always-dark" accent language — used for intentional dark
+     surfaces (focus cards, CTA buttons, focus-mode screens) regardless
+     of the app's light/dark theme */
   --ink: #1c1a17;
   --ink-soft: #24211d;
   --surface-dark-1: #2a2622;
   --surface-dark-2: #262320;
   --surface-dark-3: #34302a;
   --surface-dark-4: #46413a;
-
   --paper: #f4f1ea;
-  --canvas: #eae6dc;
-  --card: #fbf9f4;
-  --border: #e2dcd0;
-  --border-dashed: #c9bfae;
-
-  --text-muted: #6c6558;
-  --text-muted-2: #5c574e;
   --text-dark-muted: #a79e8e;
   --text-dark-muted-2: #c9bfae;
-
   --accent: #d94f2b;
   --accent-btn: #c4441f;
   --accent-link: #b03d1d;
   --accent-light-text: #ee7a54;
+  --back-pill-bg-dark-screen: rgba(255, 255, 255, 0.08);
+
+  /* adaptive tokens — these flip for dark mode below */
+  --page-bg: #f4f1ea;
+  --canvas: #eae6dc;
+  --card: #fbf9f4;
+  --border: #e2dcd0;
+  --border-dashed: #c9bfae;
+  --text-primary: #1c1a17;
+  --text-muted: #6c6558;
+  --text-muted-2: #5c574e;
   --chip-border: #e8c4b7;
   --chip-bg: #fbede8;
+  --tabbar-bg: rgba(244, 241, 234, 0.92);
+  --back-pill-bg: rgba(28, 26, 23, 0.06);
 
   color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --page-bg: #16140f;
+    --canvas: #0f0e0b;
+    --card: #221f1a;
+    --border: #34302a;
+    --border-dashed: #4a453c;
+    --text-primary: #f4f1ea;
+    --text-muted: #a79e8e;
+    --text-muted-2: #c9bfae;
+    --chip-border: #5c3527;
+    --chip-bg: #362019;
+    --tabbar-bg: rgba(20, 18, 14, 0.85);
+    --back-pill-bg: rgba(255, 255, 255, 0.08);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --page-bg: #16140f;
+  --canvas: #0f0e0b;
+  --card: #221f1a;
+  --border: #34302a;
+  --border-dashed: #4a453c;
+  --text-primary: #f4f1ea;
+  --text-muted: #a79e8e;
+  --text-muted-2: #c9bfae;
+  --chip-border: #5c3527;
+  --chip-bg: #362019;
+  --tabbar-bg: rgba(20, 18, 14, 0.85);
+  --back-pill-bg: rgba(255, 255, 255, 0.08);
+  color-scheme: dark;
 }
 
 * {
@@ -37,7 +78,7 @@ body {
   padding: 0;
   background: var(--canvas);
   font-family: 'Archivo', system-ui, sans-serif;
-  color: var(--ink);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -48,6 +89,11 @@ button {
   cursor: pointer;
   color: inherit;
   padding: 0;
+}
+
+input,
+textarea {
+  font-family: inherit;
 }
 
 #root {
@@ -83,6 +129,43 @@ button {
     height: 100dvh;
     border-radius: 0;
     box-shadow: none;
+  }
+}
+
+/* ---- screen / overlay transitions ---- */
+
+@keyframes screen-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.screen-fade {
+  animation: screen-fade-in 0.18s ease-out;
+}
+
+.overlay-slide {
+  animation: overlay-slide-up 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-fade,
+  .overlay-slide {
+    animation: none;
   }
 }
 

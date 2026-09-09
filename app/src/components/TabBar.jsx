@@ -13,7 +13,7 @@ export default function TabBar({ active, onChange, onCapture }) {
         alignItems: 'center',
         gap: 4,
         padding: '8px 10px calc(10px + env(safe-area-inset-bottom, 0px))',
-        background: 'rgba(244,241,234,0.92)',
+        background: 'var(--tabbar-bg)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderTop: '1px solid var(--border)',
@@ -45,7 +45,7 @@ export default function TabBar({ active, onChange, onCapture }) {
               fontSize: 11,
               fontWeight: active === tab.id ? 700 : 500,
               letterSpacing: '0.02em',
-              color: active === tab.id ? 'var(--ink)' : 'var(--text-muted)',
+              color: active === tab.id ? 'var(--text-primary)' : 'var(--text-muted)',
             }}
           >
             {tab.label}

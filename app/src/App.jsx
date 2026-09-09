@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PhoneFrame from './components/PhoneFrame.jsx'
 import TabBar from './components/TabBar.jsx'
 import SettingsSheet from './components/SettingsSheet.jsx'
 import { PlannerProvider, usePlannerState, usePlannerDispatch } from './state/store.jsx'
+import { nextNudge } from './state/selectors.js'
+import { dateKey } from './state/dates.js'
+import { fireNudgeNotifications, notificationsSupported } from './state/notifications.js'
 
 import TodayScreen from './screens/TodayScreen.jsx'
 import HabitsScreen from './screens/HabitsScreen.jsx'
@@ -47,10 +50,35 @@ function PlannerApp() {
 
   const runPmRoutine = () => setOverlay('pmRoutine')
 
+  // Apply the theme choice as a data attribute; 'system' removes it so the
+  // prefers-color-scheme media query in index.css takes over.
+  useEffect(() => {
+    const root = document.documentElement
+    if (state.settings.theme === 'dark' || state.settings.theme === 'light') {
+      root.setAttribute('data-theme', state.settings.theme)
+    } else {
+      root.removeAttribute('data-theme')
+    }
+  }, [state.settings.theme])
+
+  // Local nudge notifications — only fire while this tab/app is open or
+  // briefly backgrounded. A fully closed app needs a push server to wake it,
+  // which this static site doesn't have.
+  useEffect(() => {
+    if (!notificationsSupported || !state.settings.notificationsEnabled) return
+    const check = () => {
+      const now = new Date()
+      fireNudgeNotifications(nextNudge(state, now), dateKey(now))
+    }
+    check()
+    const t = setInterval(check, 30000)
+    return () => clearInterval(t)
+  }, [state])
+
   return (
     <PhoneFrame>
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
+        <div key={tab} className="screen-fade" style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
           <TabScreen
             settings={state.settings}
             onStartFocus={startFocus}
@@ -61,23 +89,35 @@ function PlannerApp() {
         </div>
 
         {overlay === 'timer' && activeTask && (
-          <TimerScreen task={activeTask} onDone={closeOverlay} onBack={closeOverlay} />
+          <div className="overlay-slide" style={{ position: 'absolute', inset: 0 }}>
+            <TimerScreen task={activeTask} onDone={closeOverlay} onBack={closeOverlay} />
+          </div>
         )}
         {overlay === 'capture' && (
-          <CaptureScreen onBack={closeOverlay} onSort={() => setOverlay('sort')} />
+          <div className="overlay-slide" style={{ position: 'absolute', inset: 0 }}>
+            <CaptureScreen onBack={closeOverlay} onSort={() => setOverlay('sort')} />
+          </div>
         )}
-        {overlay === 'sort' && <SortScreen onBack={() => setOverlay('capture')} onFinish={closeOverlay} />}
-        {overlay === 'pmRoutine' && <PMRoutineScreen onBack={closeOverlay} onDone={closeOverlay} />}
-        {overlay === 'lockscreen' && <LockScreen onBack={() => setSettingsOpen(true)} />}
+        {overlay === 'sort' && (
+          <div className="overlay-slide" style={{ position: 'absolute', inset: 0 }}>
+            <SortScreen onBack={() => setOverlay('capture')} onFinish={closeOverlay} />
+          </div>
+        )}
+        {overlay === 'pmRoutine' && (
+          <div className="overlay-slide" style={{ position: 'absolute', inset: 0 }}>
+            <PMRoutineScreen onBack={closeOverlay} onDone={closeOverlay} />
+          </div>
+        )}
+        {overlay === 'lockscreen' && (
+          <div className="overlay-slide" style={{ position: 'absolute', inset: 0 }}>
+            <LockScreen onBack={() => setSettingsOpen(true)} />
+          </div>
+        )}
 
         {settingsOpen && !overlay && (
           <SettingsSheet
-            settings={state.settings}
-            schedule={state.schedule}
-            weddingDate={state.wedding.date}
-            onChange={(settings) => dispatch({ type: 'SETTINGS_UPDATE', settings })}
-            onScheduleChange={(schedule) => dispatch({ type: 'SCHEDULE_UPDATE', schedule })}
-            onWeddingDateChange={(date) => dispatch({ type: 'WEDDING_SET_DATE', date })}
+            state={state}
+            dispatch={dispatch}
             onClose={() => setSettingsOpen(false)}
             onPreviewLockScreen={() => {
               setSettingsOpen(false)

@@ -76,6 +76,7 @@ function defaultState() {
         { id: uid(), label: 'Photographer', amount: 3400, status: 'paid' },
         { id: uid(), label: 'Catering', amount: 3300, status: 'committed' },
       ],
+      vendors: [],
     },
     timerLog: [],
     droppedLog: [],
@@ -83,8 +84,20 @@ function defaultState() {
       coachTone: 'Blunt coach',
       showDropCounts: true,
       showTimeEstimates: true,
+      theme: 'system',
+      notificationsEnabled: false,
     },
     dismissedSuggestions: {},
+  }
+}
+
+function mergeState(defaults, saved) {
+  return {
+    ...defaults,
+    ...saved,
+    settings: { ...defaults.settings, ...saved.settings },
+    wedding: { ...defaults.wedding, ...saved.wedding },
+    pmRoutine: { ...defaults.pmRoutine, ...saved.pmRoutine },
   }
 }
 
@@ -93,7 +106,7 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return defaultState()
     const parsed = JSON.parse(raw)
-    return { ...defaultState(), ...parsed }
+    return mergeState(defaultState(), parsed)
   } catch {
     return defaultState()
   }
@@ -248,6 +261,55 @@ function reducer(state, action) {
         ...state,
         wedding: { ...state.wedding, budgetItems: state.wedding.budgetItems.filter((i) => i.id !== action.id) },
       }
+
+    case 'WEDDING_ADD_VENDOR':
+      return {
+        ...state,
+        wedding: {
+          ...state.wedding,
+          vendors: [
+            ...state.wedding.vendors,
+            {
+              id: uid(),
+              category: action.category,
+              name: action.name,
+              phone: action.phone || '',
+              email: action.email || '',
+              notes: action.notes || '',
+            },
+          ],
+        },
+      }
+
+    case 'WEDDING_DELETE_VENDOR':
+      return {
+        ...state,
+        wedding: { ...state.wedding, vendors: state.wedding.vendors.filter((v) => v.id !== action.id) },
+      }
+
+    case 'ADD_HABIT':
+      return {
+        ...state,
+        habits: [
+          ...state.habits,
+          action.habitType === 'tally'
+            ? { id: uid(), title: action.title, meta: action.meta || '', type: 'tally', target: action.target || 4, history: {} }
+            : {
+                id: uid(),
+                title: action.title,
+                meta: action.meta || '',
+                type: 'check',
+                weeklyTarget: action.weeklyTarget || null,
+                history: {},
+              },
+        ],
+      }
+
+    case 'DELETE_HABIT':
+      return { ...state, habits: state.habits.filter((h) => h.id !== action.id) }
+
+    case 'IMPORT_STATE':
+      return mergeState(defaultState(), action.data)
 
     case 'SCHEDULE_UPDATE':
       return { ...state, schedule: action.schedule }
