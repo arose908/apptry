@@ -1,7 +1,21 @@
+import { useEffect, useState } from 'react'
 import BackHeader from '../components/BackHeader.jsx'
-import { nudges } from '../data/mock.js'
+import { usePlannerState, usePlannerDispatch } from '../state/store.jsx'
+import { nextNudge } from '../state/selectors.js'
+import { formatClockFromDate, formatFullDate } from '../state/dates.js'
 
 export default function LockScreen({ onBack }) {
+  const state = usePlannerState()
+  const dispatch = usePlannerDispatch()
+  const [now, setNow] = useState(() => new Date())
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  const nudges = nextNudge(state, now)
+
   return (
     <div
       style={{
@@ -20,10 +34,16 @@ export default function LockScreen({ onBack }) {
       <BackHeader label="Settings" onBack={onBack} dark />
       <div style={{ textAlign: 'center', padding: '10px 0 18px' }}>
         <div style={{ fontSize: 76, fontWeight: 600, color: 'var(--paper)', letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-          11:54
+          {formatClockFromDate(now)}
         </div>
-        <div style={{ fontSize: 15, color: 'var(--text-dark-muted-2)', paddingTop: 6 }}>Tuesday, September 8</div>
+        <div style={{ fontSize: 15, color: 'var(--text-dark-muted-2)', paddingTop: 6 }}>{formatFullDate(now)}</div>
       </div>
+
+      {nudges.length === 0 && (
+        <div style={{ background: 'rgba(244,241,234,0.94)', borderRadius: 18, padding: '15px 16px' }}>
+          <span style={{ fontSize: 15, color: 'var(--text-muted-2)' }}>Nothing pending in the next hour.</span>
+        </div>
+      )}
 
       {nudges.map((n) => (
         <div
@@ -42,25 +62,20 @@ export default function LockScreen({ onBack }) {
             <span style={{ fontSize: 12, color: '#5A5348' }}>{n.time}</span>
           </div>
           <span style={{ fontSize: 16, fontWeight: 600, color: 'var(--ink)', lineHeight: 1.3 }}>{n.text}</span>
-          {n.actions && (
+          {n.habitId && (
             <div style={{ display: 'flex', gap: 8, paddingTop: 8 }}>
-              {n.actions.map((action, i) => (
-                <span
-                  key={action}
-                  style={{
-                    flex: 1,
-                    background: i === 0 ? 'var(--ink)' : 'rgba(28,26,23,0.08)',
-                    color: i === 0 ? 'var(--paper)' : 'var(--text-muted-2)',
-                    fontSize: 14,
-                    fontWeight: i === 0 ? 600 : 500,
-                    textAlign: 'center',
-                    padding: 10,
-                    borderRadius: 8,
-                  }}
-                >
-                  {action}
-                </span>
-              ))}
+              <button
+                onClick={() => dispatch({ type: 'HABIT_TOGGLE_CHECK', id: n.habitId })}
+                style={{ flex: 1, background: 'var(--ink)', color: 'var(--paper)', fontSize: 14, fontWeight: 600, textAlign: 'center', padding: 10, borderRadius: 8 }}
+              >
+                Done
+              </button>
+              <button
+                onClick={onBack}
+                style={{ flex: 1, background: 'rgba(28,26,23,0.08)', color: 'var(--text-muted-2)', fontSize: 14, fontWeight: 500, textAlign: 'center', padding: 10, borderRadius: 8 }}
+              >
+                Not now
+              </button>
             </div>
           )}
         </div>
@@ -68,7 +83,7 @@ export default function LockScreen({ onBack }) {
 
       <div style={{ marginTop: 'auto', textAlign: 'center' }}>
         <span style={{ fontSize: 13, color: 'var(--text-dark-muted)', lineHeight: 1.5 }}>
-          Persistent, by your setting: three asks, then it logs the miss and moves on.
+          This is a preview — a browser tab can't show real lock-screen notifications.
         </span>
       </div>
     </div>
