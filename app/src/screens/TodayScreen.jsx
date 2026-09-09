@@ -1,7 +1,39 @@
-import { today } from '../data/mock.js'
+import { useEffect, useState } from 'react'
+import { usePlannerState, usePlannerDispatch } from '../state/store.jsx'
+import { buildTimeline, nextFreeWindow, droppedTodayCount, todayOpenTasks } from '../state/selectors.js'
+import { formatDateLabel } from '../state/dates.js'
 
 export default function TodayScreen({ settings, onStartFocus, onOpenSettings }) {
+  const state = usePlannerState()
+  const dispatch = usePlannerDispatch()
+  const [now, setNow] = useState(() => new Date())
+  const [dump, setDump] = useState('')
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 30000)
+    return () => clearInterval(t)
+  }, [])
+
   const blunt = settings.coachTone === 'Blunt coach'
+  const timeline = buildTimeline(state, now)
+  const freeWindow = nextFreeWindow(state, now)
+  const dropped = droppedTodayCount(state, now)
+  const fitCount = freeWindow ? todayOpenTasks(state).filter((t) => !t.minutes || t.minutes <= freeWindow.minutesLeft).length : 0
+
+  const headline = freeWindow
+    ? blunt
+      ? `You have ${freeWindow.minutesLeft} minutes free at ${freeWindow.atClock}. Don't waste it on your phone.`
+      : `You have ${freeWindow.minutesLeft} minutes free at ${freeWindow.atClock}. ${fitCount} thing${fitCount === 1 ? '' : 's'} fit${fitCount === 1 ? 's' : ''} in it.`
+    : blunt
+      ? 'Nothing free left today. Coast to the PM routine.'
+      : 'No open windows left today — you can rest.'
+
+  const submitDump = () => {
+    const lines = dump.split('\n').filter((l) => l.trim())
+    if (!lines.length) return
+    dispatch({ type: 'ADD_CAPTURE', texts: lines })
+    setDump('')
+  }
 
   return (
     <div
@@ -18,9 +50,9 @@ export default function TodayScreen({ settings, onStartFocus, onOpenSettings }) 
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <span className="eyebrow">{today.dateLabel}</span>
+          <span className="eyebrow">{formatDateLabel(now)}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {settings.showDropCounts && <span className="chip">{today.droppedCount} dropped</span>}
+            {settings.showDropCounts && <span className="chip">{dropped} dropped today</span>}
             <button
               onClick={onOpenSettings}
               aria-label="Settings"
@@ -28,25 +60,29 @@ export default function TodayScreen({ settings, onStartFocus, onOpenSettings }) 
             />
           </div>
         </div>
-        {blunt ? (
-          <p style={{ margin: 0, fontSize: 19, fontWeight: 600, lineHeight: 1.25, letterSpacing: '-0.01em' }}>
-            You have 50 minutes free at 11:55. Last week you spent it on your phone.
-          </p>
-        ) : (
-          <p style={{ margin: 0, fontSize: 19, fontWeight: 600, lineHeight: 1.25, letterSpacing: '-0.01em' }}>
-            You have 50 minutes free at 11:55. Two things fit in it.
-          </p>
-        )}
+        <p style={{ margin: 0, fontSize: 19, fontWeight: 600, lineHeight: 1.25, letterSpacing: '-0.01em' }}>
+          {headline}
+        </p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '52px 1fr', columnGap: 12, rowGap: 0 }}>
-        {today.timeline.map((slot) => (
-          <TimelineRow key={slot.id} slot={slot} settings={settings} onStartFocus={onStartFocus} />
+        {timeline.map((slot) => (
+          <TimelineRow
+            key={slot.id}
+            slot={slot}
+            settings={settings}
+            onStartFocus={onStartFocus}
+            onDrop={(id) => dispatch({ type: 'DROP_TASK', id })}
+          />
         ))}
       </div>
 
-      <div style={{ marginTop: 'auto', paddingTop: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
-        <div
+      <div style={{ marginTop: 'auto', paddingTop: 12, display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+        <textarea
+          value={dump}
+          onChange={(e) => setDump(e.target.value)}
+          placeholder="Dump anything here"
+          rows={1}
           style={{
             flex: 1,
             background: 'var(--card)',
@@ -54,12 +90,14 @@ export default function TodayScreen({ settings, onStartFocus, onOpenSettings }) 
             borderRadius: 11,
             padding: '13px 16px',
             fontSize: 15,
-            color: 'var(--text-muted)',
+            color: 'var(--ink)',
+            resize: 'none',
+            fontFamily: 'inherit',
           }}
-        >
-          Dump anything here
-        </div>
-        <div
+        />
+        <button
+          onClick={submitDump}
+          aria-label="Save"
           style={{
             width: 46,
             height: 46,
@@ -72,13 +110,13 @@ export default function TodayScreen({ settings, onStartFocus, onOpenSettings }) 
           }}
         >
           <span style={{ width: 12, height: 20, borderRadius: 6, background: 'var(--paper)', display: 'block' }} />
-        </div>
+        </button>
       </div>
     </div>
   )
 }
 
-function TimelineRow({ slot, settings, onStartFocus }) {
+function TimelineRow({ slot, settings, onStartFocus, onDrop }) {
   const isNow = slot.state === 'now'
   return (
     <>
@@ -136,15 +174,20 @@ function TimelineRow({ slot, settings, onStartFocus }) {
             <span style={{ fontSize: 18, fontWeight: 600, lineHeight: 1.25 }}>{slot.focusTask.title}</span>
             {settings.showTimeEstimates && (
               <span style={{ fontSize: 13, color: 'var(--text-dark-muted-2)', lineHeight: 1.4 }}>
-                You said {slot.focusTask.estimateMin} min. It has taken you {slot.focusTask.actualAvgMin} the last
-                three times.
+                You said {slot.focusTask.estimateMin} min.
               </span>
             )}
             <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
-              <button onClick={onStartFocus} style={{ flex: 1 }} className="btn-primary">
+              <button
+                onClick={() => onStartFocus(slot.focusTask)}
+                style={{ flex: 1 }}
+                className="btn-primary"
+              >
                 Start · {slot.focusTask.estimateMin} min
               </button>
-              <button className="btn-dark">Not this</button>
+              <button className="btn-dark" onClick={() => onDrop(slot.focusTask.id)}>
+                Not this
+              </button>
             </div>
           </div>
         )}

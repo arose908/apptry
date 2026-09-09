@@ -2,7 +2,7 @@ import { useState } from 'react'
 import PhoneFrame from './components/PhoneFrame.jsx'
 import TabBar from './components/TabBar.jsx'
 import SettingsSheet from './components/SettingsSheet.jsx'
-import { settingsDefaults } from './data/mock.js'
+import { PlannerProvider, usePlannerState, usePlannerDispatch } from './state/store.jsx'
 
 import TodayScreen from './screens/TodayScreen.jsx'
 import HabitsScreen from './screens/HabitsScreen.jsx'
@@ -22,28 +22,47 @@ const TAB_SCREENS = {
 }
 
 export default function App() {
+  return (
+    <PlannerProvider>
+      <PlannerApp />
+    </PlannerProvider>
+  )
+}
+
+function PlannerApp() {
+  const state = usePlannerState()
+  const dispatch = usePlannerDispatch()
   const [tab, setTab] = useState('today')
   const [overlay, setOverlay] = useState(null)
+  const [activeTask, setActiveTask] = useState(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [settings, setSettings] = useState(settingsDefaults)
 
   const closeOverlay = () => setOverlay(null)
   const TabScreen = TAB_SCREENS[tab]
+
+  const startFocus = (task) => {
+    setActiveTask(task)
+    setOverlay('timer')
+  }
+
+  const runPmRoutine = () => setOverlay('pmRoutine')
 
   return (
     <PhoneFrame>
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>
           <TabScreen
-            settings={settings}
-            onStartFocus={() => setOverlay('timer')}
+            settings={state.settings}
+            onStartFocus={startFocus}
             onOpenCapture={() => setOverlay('capture')}
-            onRunPMRoutine={() => setOverlay('pmRoutine')}
+            onRunPMRoutine={runPmRoutine}
             onOpenSettings={() => setSettingsOpen(true)}
           />
         </div>
 
-        {overlay === 'timer' && <TimerScreen onDone={closeOverlay} onBack={closeOverlay} />}
+        {overlay === 'timer' && activeTask && (
+          <TimerScreen task={activeTask} onDone={closeOverlay} onBack={closeOverlay} />
+        )}
         {overlay === 'capture' && (
           <CaptureScreen onBack={closeOverlay} onSort={() => setOverlay('sort')} />
         )}
@@ -53,8 +72,12 @@ export default function App() {
 
         {settingsOpen && !overlay && (
           <SettingsSheet
-            settings={settings}
-            onChange={setSettings}
+            settings={state.settings}
+            schedule={state.schedule}
+            weddingDate={state.wedding.date}
+            onChange={(settings) => dispatch({ type: 'SETTINGS_UPDATE', settings })}
+            onScheduleChange={(schedule) => dispatch({ type: 'SCHEDULE_UPDATE', schedule })}
+            onWeddingDateChange={(date) => dispatch({ type: 'WEDDING_SET_DATE', date })}
             onClose={() => setSettingsOpen(false)}
             onPreviewLockScreen={() => {
               setSettingsOpen(false)

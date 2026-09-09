@@ -1,4 +1,21 @@
-export default function SettingsSheet({ settings, onChange, onClose, onPreviewLockScreen }) {
+import { useState } from 'react'
+
+export default function SettingsSheet({
+  settings,
+  schedule,
+  weddingDate,
+  onChange,
+  onScheduleChange,
+  onWeddingDateChange,
+  onClose,
+  onPreviewLockScreen,
+}) {
+  const [editingSchedule, setEditingSchedule] = useState(false)
+
+  const updateBlock = (id, field, value) => {
+    onScheduleChange(schedule.map((b) => (b.id === id ? { ...b, [field]: value } : b)))
+  }
+
   return (
     <div
       style={{
@@ -15,6 +32,8 @@ export default function SettingsSheet({ settings, onChange, onClose, onPreviewLo
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
+          maxHeight: '85%',
+          overflowY: 'auto',
           background: 'var(--paper)',
           borderRadius: '20px 20px 0 0',
           padding: '18px 20px calc(24px + env(safe-area-inset-bottom, 0px))',
@@ -60,6 +79,48 @@ export default function SettingsSheet({ settings, onChange, onClose, onPreviewLo
           value={settings.showTimeEstimates}
           onToggle={() => onChange({ ...settings, showTimeEstimates: !settings.showTimeEstimates })}
         />
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span className="eyebrow">Wedding date</span>
+          <input
+            type="date"
+            value={weddingDate}
+            onChange={(e) => onWeddingDateChange(e.target.value)}
+            style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', fontSize: 14, color: 'var(--ink)' }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <button
+            onClick={() => setEditingSchedule((v) => !v)}
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <span className="eyebrow">Your day</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-link)' }}>{editingSchedule ? 'Done' : 'Edit'}</span>
+          </button>
+          {editingSchedule &&
+            schedule.map((block) => (
+              <div key={block.id} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <input
+                  type="time"
+                  value={block.start}
+                  onChange={(e) => updateBlock(block.id, 'start', e.target.value)}
+                  style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px', fontSize: 13, width: 90 }}
+                />
+                <input
+                  type="time"
+                  value={block.end}
+                  onChange={(e) => updateBlock(block.id, 'end', e.target.value)}
+                  style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px', fontSize: 13, width: 90 }}
+                />
+                <input
+                  value={block.label}
+                  onChange={(e) => updateBlock(block.id, 'label', e.target.value)}
+                  style={{ flex: 1, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px', fontSize: 13, minWidth: 0 }}
+                />
+              </div>
+            ))}
+        </div>
 
         <button
           onClick={onPreviewLockScreen}
