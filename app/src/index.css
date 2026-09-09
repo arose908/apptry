@@ -52,10 +52,38 @@ button {
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 32px 16px;
+}
+
+.phone-frame {
+  width: 100%;
+  max-width: 402px;
+  height: min(874px, 100dvh);
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(28, 26, 23, 0.08), 0 24px 48px -12px rgba(28, 26, 23, 0.35);
+  display: flex;
+  flex-direction: column;
+}
+
+/* On an actual phone (or once installed as an app), the device itself is
+   the frame — drop the mockup bezel/shadow and let the app fill the screen. */
+@media (max-width: 480px), (display-mode: standalone), (display-mode: fullscreen) {
+  #root {
+    padding: 0;
+  }
+
+  .phone-frame {
+    max-width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
 }
 
 /* ---- shared building blocks (mirrors the mockup's repeated patterns) ---- */
